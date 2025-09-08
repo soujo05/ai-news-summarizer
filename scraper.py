@@ -7,7 +7,6 @@ from bs4 import BeautifulSoup
 from text_cleaning import fix_mojibake
 
 def _safe_decode(resp: requests.Response) -> str:
-    
     try:
         return resp.content.decode("utf-8")
     except UnicodeDecodeError:
@@ -25,7 +24,7 @@ def scrape_news(url):
             )
         }
 
-        
+        # First attempt: requests + newspaper
         response = requests.get(url, headers=headers, timeout=15)
         if response.status_code != 200:
             return {"error": f"Failed to fetch URL, status code: {response.status_code}"}
@@ -34,15 +33,20 @@ def scrape_news(url):
         article.set_html(response.text)
         article.parse()
 
+        authors = []
+        if article.authors:
+            # Keep only entries with 1–3 words (likely proper names)
+            authors = [a for a in article.authors if 0 < len(a.split()) <= 3]
+
         if article.text and len(article.text.split()) > 50:  
             return {
                 "title": article.title,
-                "authors": article.authors,
+                "authors": authors,
                 "publish_date": article.publish_date,
                 "text": article.text,
             }
 
-        
+        # Fallback: Playwright + BeautifulSoup
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
@@ -55,8 +59,8 @@ def scrape_news(url):
         text = " ".join(paragraphs)
 
         return {
-            "title": article.title or soup.title.string if soup.title else "",
-            "authors": article.authors or [],
+            "title": article.title or (soup.title.string if soup.title else ""),
+            "authors": authors,  # reuse cleaned authors
             "publish_date": article.publish_date,
             "text": text.strip(),
         }

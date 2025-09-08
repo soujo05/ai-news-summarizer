@@ -9,11 +9,10 @@ summarizer_model = pipeline(
     device=-1
 )
 sentiment_model = pipeline(
-    "sentiment-analysis", 
-    model="distilbert-base-uncased-finetuned-sst-2-english", 
-    device=-1
+    task="text-classification",  
+    model="fhamborg/roberta-targeted-sentiment-classification-newsarticles",
+    tokenizer="fhamborg/roberta-targeted-sentiment-classification-newsarticles"
 )
-
 def chunk_text(text, max_words=800):
     """Split long text into smaller chunks."""
     words = text.split()
