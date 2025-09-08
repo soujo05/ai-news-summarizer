@@ -9,3 +9,4 @@ sentencepiece==0.1.99
 gTTS==2.5.1
 reportlab==4.2.2
 playwright==1.47.0
+numpy==1.26.0
