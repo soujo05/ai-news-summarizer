@@ -1,4 +1,3 @@
-# utils.py
 import os
 import unicodedata
 from reportlab.lib.pagesizes import A4
@@ -12,7 +11,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase.pdfmetrics import registerFontFamily
 from reportlab.platypus import PageBreak
 
-# Register DejaVu fonts (Regular + Bold)
+#  DejaVu fonts (Regular + Bold)
 font_dir = os.path.join(os.path.dirname(__file__), "fonts")
 pdfmetrics.registerFont(TTFont("DejaVu", os.path.join(font_dir, "DejaVuSans.ttf")))
 pdfmetrics.registerFont(TTFont("DejaVu-Bold", os.path.join(font_dir, "DejaVuSans-Bold.ttf")))
@@ -52,24 +51,24 @@ def save_pdf(articles, filename: str):
     title_style = ParagraphStyle(
         "Title",
         parent=styles["Heading1"],
-        fontName="DejaVu-Bold",   # Use bold font here
+        fontName="DejaVu-Bold",   
         fontSize=16,
-        textColor=colors.HexColor("#2C3E50"),
+        textColor=colors.HexColor("#163D64"),
         spaceAfter=12,
     )
     subtitle_style = ParagraphStyle(
         "Subtitle",
         parent=styles["Heading2"],
-        fontName="DejaVu-Bold",   # Bold for headings
+        fontName="DejaVu-Bold",   
         fontSize=13,
-        textColor=colors.HexColor("#34495E"),
+        textColor=colors.HexColor("#163D64"),
         spaceAfter=8,
     )
 
     story = []
 
     for idx, article in enumerate(articles, 1):
-        # Clean text fields
+        
         article["title"] = clean_text(article.get("title", ""))
         article["summary"] = clean_text(article.get("summary", ""))
         article["key_points"] = [clean_text(pt) for pt in article.get("key_points", [])]
@@ -110,7 +109,7 @@ def save_pdf(articles, filename: str):
             normal_style
         ))
         story.append(Spacer(1, 20))
-
+        # Every  article will start from new page
         if idx < len(articles):
             story.append(PageBreak())
 

@@ -1,6 +1,6 @@
 from transformers import pipeline
 import re
-from text_cleaning import fix_mojibake   # <-- import the cleaner
+from text_cleaning import fix_mojibake   # This fixes the garbage text in the words
 
 # Load models once
 summarizer_model = pipeline(
@@ -21,7 +21,7 @@ def chunk_text(text, max_words=800):
         yield " ".join(words[i:i+max_words])
 
 def process_article(text):
-    # ---- Summarization ----
+    # ---- Using Chunks to handle long texts ----
     chunks = list(chunk_text(text))
     summaries = []
 
@@ -31,7 +31,7 @@ def process_article(text):
         )[0]["summary_text"]
         summaries.append(summary)
 
-    # Merge summaries into one detailed summary
+   
     full_summary = " ".join(summaries)
 
     # ---- Key Points ----
@@ -39,11 +39,10 @@ def process_article(text):
         full_summary, max_length=150, min_length=60, do_sample=False
     )[0]["summary_text"]
 
-    # Split into sentences
+    
     key_points = re.split(r"(?<=[.!?]) +", short_summary)
     key_points = [s.strip() for s in key_points if s.strip()]
 
-    # If still < 5, add some sentences directly from article
     if len(key_points) < 5:
         raw_sentences = re.split(r"(?<=[.!?]) +", text)
         for s in raw_sentences:
@@ -54,11 +53,11 @@ def process_article(text):
 
     key_points = key_points[:5]  # take top 5
 
-    # ---- Sentiment ----
+    # ---- Sentiment(Positive/Negative)----
     sentiment = sentiment_model(full_summary[:512])[0]["label"]
     sentiment = "Positive" if sentiment == "POSITIVE" else "Negative"
 
-    # ---- Clean outputs (fix mojibake, quotes, dashes) ----
+    # ---- Clean outputs  ----
     full_summary = fix_mojibake(full_summary)
     key_points = [fix_mojibake(kp) for kp in key_points]
 

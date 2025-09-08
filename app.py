@@ -1,9 +1,8 @@
-# app.py
 import streamlit as st
 import tempfile
 from scraper import scrape_news
 from processor import process_article
-from utils import save_pdf   # styled PDF
+from utils import save_pdf  
 from gtts import gTTS
 
 st.set_page_config(page_title="AI News Summarizer", layout="wide")
@@ -101,7 +100,7 @@ if st.session_state["articles"]:
             audio_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
             tts.save(audio_file.name)
 
-            st.audio(audio_file.name)  # play inside Streamlit
+            st.audio(audio_file.name)  
 
             with open(audio_file.name, "rb") as f:
                 st.download_button(
