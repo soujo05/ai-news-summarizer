@@ -23,13 +23,13 @@ It allows users to paste **news article URLs** or raw **article text** and gener
 
 ## Project Structure
 
-├── app.py # Streamlit main app
-├── processor.py # Summarization, sentiment, key points
-├── scraper.py # News scraping
-├── utils.py # PDF generation utilities
-├── text_cleaning.py # Fixes mojibake & text artifacts
-├── requirements.txt # Dependencies
-└── fonts/ # DejaVuSans fonts for Unicode PDF export
+- ***app.py*** # Streamlit main app
+- ***processor.py*** # Summarization, sentiment, key points
+- ***scraper.py*** # News scraping
+- ***utils.py*** # PDF generation utilities
+- ***text_cleaning.py*** # Fixes mojibake & text artifacts
+- ***requirements.txt*** # Dependencies
+- ***fonts/*** # DejaVuSans fonts for Unicode PDF export
 
 ## Tech Stack
 
