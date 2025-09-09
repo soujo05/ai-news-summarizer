@@ -39,8 +39,8 @@ def process_article(text):
     for chunk in chunks:
         summary = summarizer_model(
             chunk,
-            max_length=180,  # keep under safe size
-            min_length=50,
+            max_length=180,  
+            min_length=70,
             do_sample=False
         )[0]["summary_text"]
         summaries.append(summary)
