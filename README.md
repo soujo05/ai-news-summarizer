@@ -52,7 +52,7 @@ It allows users to paste **news article URLs** or raw **article text** and gener
 
 ### Prerequisites
 
-- Python 3.9+  
+- Python 3.10  
 - Required dependencies (install using `requirements.txt`)  
 - Playwright installed (`playwright install`)  
 
