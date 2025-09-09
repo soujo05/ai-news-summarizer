@@ -1,24 +1,36 @@
-from transformers import pipeline
+from transformers import pipeline, BartTokenizer
 import re
 from text_cleaning import fix_mojibake   # This fixes the garbage text in the words
 
-# Load models once
+# ---------------- Load models once ----------------
 summarizer_model = pipeline(
-    "summarization", 
-    model="facebook/bart-large-cnn", 
+    "summarization",
+    model="facebook/bart-large-cnn",
     device=-1
 )
+
 sentiment_model = pipeline(
-    task="text-classification",  
+    task="text-classification",
     model="fhamborg/roberta-targeted-sentiment-classification-newsarticles",
     tokenizer="fhamborg/roberta-targeted-sentiment-classification-newsarticles"
 )
-def chunk_text(text, max_words=800):
-    """Split long text into smaller chunks."""
-    words = text.split()
-    for i in range(0, len(words), max_words):
-        yield " ".join(words[i:i+max_words])
 
+# Load tokenizer for safe chunking
+tokenizer = BartTokenizer.from_pretrained("facebook/bart-large-cnn")
+
+
+# ---------------- Chunking Function ----------------
+def chunk_text(text, max_tokens=900):
+    """
+    Split text into smaller chunks within token limits of BART (1024).
+    """
+    tokens = tokenizer.encode(text, truncation=False)
+    for i in range(0, len(tokens), max_tokens):
+        chunk_tokens = tokens[i:i + max_tokens]
+        yield tokenizer.decode(chunk_tokens, skip_special_tokens=True)
+
+
+# ---------------- Main Processing ----------------
 def process_article(text):
     # ---- Using Chunks to handle long texts ----
     chunks = list(chunk_text(text))
@@ -26,19 +38,23 @@ def process_article(text):
 
     for chunk in chunks:
         summary = summarizer_model(
-            chunk, max_length=200, min_length=80, do_sample=False
+            chunk,
+            max_length=180,  # keep under safe size
+            min_length=50,
+            do_sample=False
         )[0]["summary_text"]
         summaries.append(summary)
 
-   
     full_summary = " ".join(summaries)
 
     # ---- Key Points ----
     short_summary = summarizer_model(
-        full_summary, max_length=150, min_length=60, do_sample=False
+        full_summary,
+        max_length=150,
+        min_length=60,
+        do_sample=False
     )[0]["summary_text"]
 
-    
     key_points = re.split(r"(?<=[.!?]) +", short_summary)
     key_points = [s.strip() for s in key_points if s.strip()]
 
@@ -52,11 +68,11 @@ def process_article(text):
 
     key_points = key_points[:5]  # take top 5
 
-    # ---- Sentiment(Positive/Negative)----
+    # ---- Sentiment (Positive/Negative) ----
     sentiment = sentiment_model(full_summary[:512])[0]["label"]
     sentiment = "Positive" if sentiment == "POSITIVE" else "Negative"
 
-    # ---- Clean outputs  ----
+    # ---- Clean outputs ----
     full_summary = fix_mojibake(full_summary)
     key_points = [fix_mojibake(kp) for kp in key_points]
 
